@@ -1,16 +1,18 @@
 const express = require('express');
 const { webCheckIn, getCheckedInBookings, getBookingById } = require('../controllers/checkInController');
 const authMiddleware = require('../middleware/authMiddleware');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 const router = express.Router();
 
-// Protected routes
-router.post('/api/checkin/booking/:bookingId', authMiddleware, webCheckIn);
-router.get('/api/checkin/bookings', authMiddleware, getCheckedInBookings);
-router.get('/api/checkin/booking/:bookingId', authMiddleware, getBookingById);
+// Protected routes - remove the duplicate '/api' prefix
+router.post('/booking/:bookingId', authMiddleware, webCheckIn);
+router.get('/bookings', authMiddleware, getCheckedInBookings);
+router.get('/booking/:bookingId', authMiddleware, getBookingById);
 
 // Add a general bookings route
-router.get('/api/bookings', authMiddleware, async (req, res) => {
+router.get('/all', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id;
         const bookings = await prisma.booking.findMany({
