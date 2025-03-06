@@ -1,0 +1,56 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model Booking {
+  id                  String         @id @default(uuid())
+  userId              String
+  hotelId             String
+  checkInDate         DateTime
+  checkOutDate        DateTime
+  status              BookingStatus
+  primaryGuestAadhaar String?        // Optional during booking
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  hotel  Hotel   @relation(fields: [hotelId], references: [id])
+  guests Guest[]
+}
+
+model Hotel {
+  id          String    @id @default(uuid())
+  name        String
+  address     String
+  description String?
+  bookings    Booking[]
+}
+
+model Guest {
+  id            String  @id @default(uuid())
+  bookingId     String
+  booking       Booking @relation(fields: [bookingId], references: [id])
+  name          String
+  aadhaarNumber String  @unique
+  age           Int
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CANCELLED
+}
